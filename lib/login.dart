@@ -1,7 +1,6 @@
 import 'dart:convert';
-
+import 'package:server/shared/http/login/login_request.dart';
 import 'package:shelf/shelf.dart';
-import 'package:shared/shared.dart';
 
 Future<Response> loginHandler(Request req) async {
   // For now, just approve the login request if the full stuff is there

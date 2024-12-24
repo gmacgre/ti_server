@@ -9,10 +9,6 @@ environment:
 # Add regular dependencies here.
 dependencies:
   # path: ^1.8.0
-  shared:
-    git: 
-      url: https://github.com/gmacgre/ti_shared.git
-      ref: master # branch name
   shelf: ^1.4.1
   shelf_router: ^1.1.4
 

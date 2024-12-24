@@ -217,15 +217,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  shared:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: master
-      resolved-ref: b10dcb6637890b90d76657eeb8048005bd2bb3cb
-      url: "https://github.com/gmacgre/ti_shared.git"
-    source: git
-    version: "1.0.1"
   shelf:
     dependency: "direct main"
     description:
