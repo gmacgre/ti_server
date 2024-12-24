@@ -13,6 +13,8 @@ dependencies:
     git: 
       url: https://github.com/gmacgre/ti_shared.git
       ref: master # branch name
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
 
 dev_dependencies:
   lints: ^2.1.0
