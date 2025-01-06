@@ -1,19 +1,37 @@
+import "dart:convert";
+import 'dart:io';
+
 import 'package:server/login.dart';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_router/shelf_router.dart' as shelf_router;
 
-void main(List<String> arguments) async {
-  // Build the server and router
+Set<WebSocket> connections = <WebSocket>{}; 
 
-  final server = await shelf_io.serve(logRequests().addHandler(_router), 'localhost', 3000);
-  print('Running server on ${server.address.host}:${server.port}');
-
+void handleWebSocket(WebSocket webSocket) {
+  connections.add(webSocket); // Add to allow broadcasting. Made later add keying to allow for direct comms for DMs/Chats
+  webSocket
+    .map((string)=> json.decode(string))
+    .listen((json) {
+      switch(json['type']) {
+        case 'Login':
+          handleLoginRequest(json);
+      }
+    }, onError: (error) {
+      print('Bad WebSocket request');
+    })
+    .onDone(() {
+      print('Removing a Connection');
+      connections.remove(webSocket);
+      print('New Size: ${connections.length}');
+    });
 }
 
-final _router = shelf_router.Router()
-  ..get('/', (req) => Response(200))
-  ..mount('/api/', shelf_router.Router()
-    ..post('/login', loginHandler)
-    ..get('/', (req) => Response.ok('Weird to call this but ok'))
-  );
+
+void main() {
+  int port = 3000;
+
+  HttpServer.bind(InternetAddress.loopbackIPv4, port).then((server) {
+    server.transform(WebSocketTransformer()).listen(handleWebSocket);
+    print("Search server is running on "
+             "'http://${server.address.address}:$port/'");
+  });
+}
+
