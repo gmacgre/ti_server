@@ -7,18 +7,28 @@ import 'package:server/login.dart';
 // Models
 import 'package:server/shared/http/login/login_request.dart';
 import 'package:server/shared/http/response.dart';
+import 'package:server/shared/model/game.dart';
 
-Set<WebSocket> connections = <WebSocket>{}; 
+Map<String, WebSocket> playerToSocket = {};
+Map<String, Game> keyToGame = {};
+Set<WebSocket> toAdd = {};
+// TODO: Make a mySQL Connection here to pass around eventually
 
 void handleWebSocket(WebSocket webSocket) {
-  connections.add(webSocket); // Add to allow broadcasting. Made later add keying to allow for direct comms for DMs/Chats
+  toAdd.add(webSocket);
   webSocket
     .map((string)=> json.decode(string))
     .listen((json) {
       TIResponse res;
       switch(json['type']) {
         case 'Login':
-          res = handleLoginRequest(LoginRequest.fromJson(json));
+          LoginRequest req = LoginRequest.fromJson(json);
+          res = handleLoginRequest(req, keyToGame);
+          if (res.isSuccess) {
+            toAdd.remove(webSocket);
+            playerToSocket['${req.gameId}--${req.userId}'] = webSocket;
+          }
+        case 'Create':
         case _:
           res = handleErrorRequest(LoginRequest.fromJson(json), 'Request Type not accepted.');
       }
@@ -28,8 +38,13 @@ void handleWebSocket(WebSocket webSocket) {
     })
     .onDone(() {
       print('Removing a Connection');
-      connections.remove(webSocket);
-      print('New Size: ${connections.length}');
+      // Remove it from the main holdover
+      for (String s in playerToSocket.keys) {
+        if(playerToSocket[s] == webSocket) {
+          print('Removing $s');
+          playerToSocket.remove(s);
+        }
+      }
     });
 }
 
